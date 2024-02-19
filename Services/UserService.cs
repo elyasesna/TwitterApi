@@ -90,22 +90,6 @@ namespace TwitterApi.Services
          };
       }
 
-      public async Task<string> Login(LoginModel loginModel)
-      {
-         //ToDo: need to be refactored
-         var user = await _unitOfWork
-            .Get<User>().FirstOrDefaultAsync(x=>x.UserName == loginModel.UserName);
-         if(user is null)
-         {
-            throw new Exception("user/paswword not coorect");
-         }
-         if( true)
-         {
-            return Guid.NewGuid().ToString() +"-"+ Guid.NewGuid().ToString();
-         }
-         throw new Exception("user/paswword not coorect");
-      }
-
       public async Task<UserDTO> UpdateAsync(string userId, UserModel user)
       {
          var userEntity = await _unitOfWork

@@ -17,7 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<User>(options =>
+builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
    options.SignIn.RequireConfirmedAccount = true;
    options.Password.RequireDigit = true;
@@ -26,9 +26,11 @@ builder.Services.AddDefaultIdentity<User>(options =>
 }).AddEntityFrameworkStores<ApplicationDbContext>()
 .AddApiEndpoints();
 
-builder.Services.AddAuthentication(IdentityConstants.BearerScheme)
-                .AddBearerToken(IdentityConstants.BearerScheme);
-//builder.Services.AddAuthorizationBuilder();
+builder.Services.AddAuthentication(cs =>
+{
+   cs.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
+   cs.DefaultChallengeScheme = IdentityConstants.BearerScheme;
+}).AddBearerToken(IdentityConstants.BearerScheme);
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -46,7 +48,7 @@ builder.Services.AddSwaggerGen(c =>
                       \r\n\r\nExample: 'Bearer 12345abcdef'",
       Name = "Authorization",
       In = ParameterLocation.Header,
-      Type = SecuritySchemeType.ApiKey,
+      Type = SecuritySchemeType.Http,
       Scheme = "Bearer"
    });
 
@@ -77,8 +79,8 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapGroup("api/user").MapIdentityApi<User>();
-app.MapGet("api/user/claims", (ClaimsPrincipal user) => user.Identity.Name)
-   .RequireAuthorization();
+//app.MapGet("api/user/claims", (ClaimsPrincipal user) => user.Identity.Name)
+//   .RequireAuthorization();
 
 app.MapControllers();
 
