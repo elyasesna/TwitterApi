@@ -3,22 +3,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TwitterApi.Contracts;
 using TwitterApi.Data;
-using TwitterApi.Data.DTOs.User;
+using TwitterApi.Data.DTOs;
 using TwitterApi.Data.Entities;
-using TwitterApi.Data.Models.User;
+using TwitterApi.Data.Models;
+using TwitterApi.Utilities;
 
 namespace TwitterApi.Services
 {
-   public class UserService : BaseService, IUserService
+    public class UserService : BaseService, IUserService
    {
       private readonly UserManager<User> _userManager;
+      private readonly IWebHostEnvironment _env;
 
       public UserService(
          IUnitOfWork unitOfWork,
-         UserManager<User> userManager)
+         UserManager<User> userManager,
+         IWebHostEnvironment env)
          : base(unitOfWork)
       {
          _userManager = userManager;
+         _env = env;
       }
 
       public async Task<UserDTO> CreateAsync(UserModel user)
@@ -43,7 +47,8 @@ namespace TwitterApi.Services
                FistName = userEntity.FirstName,
                Id = userEntity.Id,
                IsConfirmed = userEntity.EmailConfirmed,
-               LastName = userEntity.LastName
+               LastName = userEntity.LastName,
+            Avatar = userEntity.ProfileImagePath.GetAvatarPath(_env)
             };
          }
          throw new AccessViolationException();
@@ -68,7 +73,8 @@ namespace TwitterApi.Services
                FistName = p.FirstName,
                Id = p.Id,
                IsConfirmed = p.EmailConfirmed,
-               LastName = p.LastName
+               LastName = p.LastName,
+               RegisteredAt = p.RegisteredAt
             })
             .ToListAsync();
       }
@@ -86,7 +92,8 @@ namespace TwitterApi.Services
             FistName = result.FirstName,
             Id = result.Id,
             IsConfirmed = result.EmailConfirmed,
-            LastName = result.LastName
+            LastName = result.LastName,
+            Avatar = result.ProfileImagePath.GetAvatarPath(_env)
          };
       }
 
@@ -113,11 +120,23 @@ namespace TwitterApi.Services
                FistName = userEntity.FirstName,
                Id = userEntity.Id,
                IsConfirmed = userEntity.EmailConfirmed,
-               LastName = userEntity.LastName
+               LastName = userEntity.LastName,
+               Avatar = userEntity.ProfileImagePath.GetAvatarPath(_env)
             };
          }
 
          throw new EntryPointNotFoundException();
+      }
+
+      public async Task<(bool result, string oldPath)> UpdateAvatarAsync(string userId, string filePath)
+      {
+         var userEntity = await _unitOfWork
+            .GetByIdAsync<User>(userId) ?? throw new EntryPointNotFoundException();
+
+         string oldPath = userEntity.ProfileImagePath;
+         userEntity.ProfileImagePath = filePath;
+
+         return (await _unitOfWork.CommityAsync(), oldPath);
       }
    }
 }

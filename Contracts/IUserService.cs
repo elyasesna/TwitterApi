@@ -1,6 +1,6 @@
-﻿using TwitterApi.Data.DTOs.User;
+﻿using TwitterApi.Data.DTOs;
 using TwitterApi.Data.Entities;
-using TwitterApi.Data.Models.User;
+using TwitterApi.Data.Models;
 
 namespace TwitterApi.Contracts
 {
@@ -10,6 +10,7 @@ namespace TwitterApi.Contracts
       public Task<UserDTO> GetByIdAsync(string id);
       public Task<UserDTO> CreateAsync(UserModel user);
       public Task<UserDTO> UpdateAsync(string userId, UserModel user);
+      public Task<(bool result, string oldPath)> UpdateAvatarAsync(string userId, string filePath);
       public Task<bool> Delete(string id);
    }
 }
