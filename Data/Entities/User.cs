@@ -11,5 +11,8 @@ namespace TwitterApi.Data.Entities
       public string LastName { get; set; } = string.Empty;
       [MaxLength(150)]
       public string ProfileImagePath { get; set; } = string.Empty;
+
+      public DateTime RegisteredAt { get; set; } = DateTime.Now;
+      public DateTime LastUpdatedAt { get; set; } = DateTime.Now;
    }
 }
