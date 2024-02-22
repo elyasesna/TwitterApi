@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Options;
-using SendGrid.Helpers.Mail;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
 using SendGrid;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using SendGrid.Helpers.Mail;
 
 namespace TwitterApi.Services
 {
@@ -30,22 +30,29 @@ namespace TwitterApi.Services
       public async Task Execute(string apiKey, string subject, string message, string toEmail)
       {
          var client = new SendGridClient(apiKey);
-         var msg = new SendGridMessage()
-         {
-            From = new EmailAddress("", ""),
-            Subject = subject,
-            PlainTextContent = message,
-            HtmlContent = message
-         };
-         msg.AddTo(new EmailAddress(toEmail));
-
-         // Disable click tracking.
-         // See https://sendgrid.com/docs/User_Guide/Settings/tracking.html
-         msg.SetClickTracking(false, false);
-         var response = await client.SendEmailAsync(msg);
+         var from_email = new EmailAddress("your email address", "your name");
+         var to_email = new EmailAddress(toEmail, toEmail);
+         var msg = MailHelper.CreateSingleEmail(from_email, to_email, subject, message, message);
+         var response = await client.SendEmailAsync(msg).ConfigureAwait(false);
          _logger.LogInformation(response.IsSuccessStatusCode
                                 ? $"Email to {toEmail} queued successfully!"
                                 : $"Failure Email to {toEmail}");
+
+         //sending emal using System.Net.Mail
+         //MailMessage msg = new();
+         //msg.Sender = new("your email address");
+         //msg.From = new("your email address");
+         //msg.To.Add(toEmail);
+         //msg.Subject = subject;
+         //msg.Body = message;
+
+         //using var smtp = new SmtpClient();
+         //smtp.Host = "smtp.gmail.com";
+         //smtp.Port = 587;
+         //smtp.EnableSsl = true;
+         //smtp.UseDefaultCredentials = false;
+         //smtp.Credentials = new NetworkCredential("your email address", "your password");
+         //smtp.Send(msg);
       }
    }
 }
