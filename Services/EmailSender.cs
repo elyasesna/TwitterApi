@@ -32,7 +32,7 @@ namespace TwitterApi.Services
          var client = new SendGridClient(apiKey);
          var msg = new SendGridMessage()
          {
-            From = new EmailAddress("elyasesnaashari@gmail.com", ""),
+            From = new EmailAddress("", ""),
             Subject = subject,
             PlainTextContent = message,
             HtmlContent = message
