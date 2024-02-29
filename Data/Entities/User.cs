@@ -12,7 +12,10 @@ namespace TwitterApi.Data.Entities
       [MaxLength(150)]
       public string ProfileImagePath { get; set; } = string.Empty;
 
+      public string FullName { get; set; }
       public DateTime RegisteredAt { get; set; } = DateTime.Now;
       public DateTime LastUpdatedAt { get; set; } = DateTime.Now;
+
+      public ICollection<Post> Posts { get; set; }
    }
 }

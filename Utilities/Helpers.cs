@@ -17,9 +17,10 @@
          );
       }
 
-      public static string GetAvatarPath(this string path, IWebHostEnvironment env)
+      public static string GetAvatarPath(this string path)
       {
-         return path.Replace(env.WebRootPath, "").Replace(@"\", "/");
+         var root = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+         return "https://localhost:7022" +  path.Replace(root, "").Replace(@"\", "/");
       }
    }
 }
