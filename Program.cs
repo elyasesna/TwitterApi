@@ -39,6 +39,12 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<EmailOptions>(builder.Configuration);
 
+builder.Services.AddAutoMapper(mapper =>
+{
+   mapper.AddProfile(new MappingProfile());
+   mapper.AllowNullCollections = true;
+});
+
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TwitterApi.Contracts;
@@ -10,16 +12,17 @@ using TwitterApi.Utilities;
 
 namespace TwitterApi.Services
 {
-    public class UserService : BaseService, IUserService
+   public class UserService : BaseService, IUserService
    {
       private readonly UserManager<User> _userManager;
       private readonly IWebHostEnvironment _env;
 
       public UserService(
          IUnitOfWork unitOfWork,
+         IMapper mapper,
          UserManager<User> userManager,
          IWebHostEnvironment env)
-         : base(unitOfWork)
+         : base(unitOfWork, mapper)
       {
          _userManager = userManager;
          _env = env;
@@ -39,17 +42,7 @@ namespace TwitterApi.Services
 
          if (result.Succeeded)
          {
-            return new UserDTO
-            {
-               PhoneNumber = userEntity.PhoneNumber,
-               UserName = userEntity.UserName,
-               Email = userEntity.Email,
-               FistName = userEntity.FirstName,
-               Id = userEntity.Id,
-               IsConfirmed = userEntity.EmailConfirmed,
-               LastName = userEntity.LastName,
-            Avatar = userEntity.ProfileImagePath.GetAvatarPath(_env)
-            };
+            return _mapper.Map<User, UserDTO>(userEntity);
          }
          throw new AccessViolationException();
       }
@@ -65,36 +58,21 @@ namespace TwitterApi.Services
       {
          return _unitOfWork
             .Get<User>()
-            .Select(p => new UserDTO
-            {
-               PhoneNumber = p.PhoneNumber,
-               UserName = p.UserName,
-               Email = p.Email,
-               FistName = p.FirstName,
-               Id = p.Id,
-               IsConfirmed = p.EmailConfirmed,
-               LastName = p.LastName,
-               RegisteredAt = p.RegisteredAt
-            })
+            .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
             .ToListAsync();
       }
 
       public async Task<UserDTO> GetByIdAsync(string id)
       {
-         var result = await _unitOfWork
-            .GetByIdAsync<User>(id);
+         //var result = await _unitOfWork
+         //   .Get<User>()
+         //   .Where(p => p.Id == id)
+         //   .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
+         //   .FirstOrDefaultAsync();
 
-         return new UserDTO
-         {
-            PhoneNumber = result.PhoneNumber,
-            UserName = result.UserName,
-            Email = result.Email,
-            FistName = result.FirstName,
-            Id = result.Id,
-            IsConfirmed = result.EmailConfirmed,
-            LastName = result.LastName,
-            Avatar = result.ProfileImagePath.GetAvatarPath(_env)
-         };
+         var result = await _userManager.FindByIdAsync(id) ?? throw new EntryPointNotFoundException();
+
+         return _mapper.Map<User, UserDTO>(result);
       }
 
       public async Task<UserDTO> UpdateAsync(string userId, UserModel user)
@@ -112,17 +90,7 @@ namespace TwitterApi.Services
 
          if (result.Succeeded)
          {
-            return new UserDTO
-            {
-               PhoneNumber = userEntity.PhoneNumber,
-               UserName = userEntity.UserName,
-               Email = userEntity.Email,
-               FistName = userEntity.FirstName,
-               Id = userEntity.Id,
-               IsConfirmed = userEntity.EmailConfirmed,
-               LastName = userEntity.LastName,
-               Avatar = userEntity.ProfileImagePath.GetAvatarPath(_env)
-            };
+            return _mapper.Map<User, UserDTO>(userEntity);
          }
 
          throw new EntryPointNotFoundException();
