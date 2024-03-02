@@ -15,9 +15,13 @@ namespace TwitterApi.Data.Entities
       public string UserId { get; set; }
       public DateTime CreatedAt { get; set; } = DateTime.Now;
       public DateTime? LastUpdatedAt { get; set; }
-      public ICollection<PostHashtag> PostTags { get; set; }
-      public ICollection<Comment> Comments { get; set; }
-      public ICollection<View> Views { get; set; }
+      public ICollection<PostHashtags> Hashtags { get; set; }
+      public ICollection<PostComments> Comments { get; set; }
+      public ICollection<PostVisitors> Visitors { get; set; }
+      public ICollection<PostLikes> Likes { get; set; }
 
+      [ForeignKey("RePostId")]
+      public Post RePost { get; set; }
+      public long? RePostId { get; set; }
    }
 }
