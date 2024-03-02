@@ -13,7 +13,7 @@ namespace TwitterApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240221184127_change-default-length")]
-    partial class changedefaultlength
+    partial class ChangeIdentityDefaultLength
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

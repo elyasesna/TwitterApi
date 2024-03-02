@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TwitterApi.Migrations
 {
     /// <inheritdoc />
-    public partial class adduserdates : Migration
+    public partial class AddUserDates : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

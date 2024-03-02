@@ -13,7 +13,7 @@ namespace TwitterApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240222080137_add-user-dates")]
-    partial class adduserdates
+    partial class AddUserDates
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
