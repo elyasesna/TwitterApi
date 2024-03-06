@@ -10,8 +10,18 @@ namespace TwitterApi.Data
       public MappingProfile()
       {
          CreateMap<User, UserDTO>()
-            .ForMember(p => p.IsConfirmed, 
+            .ForMember(p => p.IsConfirmed,
                        q => q.MapFrom(x => x.EmailConfirmed || x.PhoneNumberConfirmed));
+
+         CreateMap<Post, PostDTO>()
+            .ForMember(p => p.Username,
+                       q => q.MapFrom(x => x.User.UserName))
+            .ForMember(p => p.CommentCount,
+                       q => q.MapFrom(x => x.Comments.Count()))
+            .ForMember(p => p.LikeCount,
+                       q => q.MapFrom(x => x.Likes.Count()))
+            .ForMember(p => p.VisitCount,
+                       q => q.MapFrom(x => x.Visitors.Count()));
       }
    }
 }
