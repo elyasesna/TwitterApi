@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TwitterApi.Data.Entities
 {
-   public class Comment
+   public class PostComments
    {
       public long Id { get; set; }
       [Required]

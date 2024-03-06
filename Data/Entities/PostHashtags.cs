@@ -2,7 +2,7 @@
 
 namespace TwitterApi.Data.Entities
 {
-   public class PostHashtag
+   public class PostHashtags
    {
       public long Id { get; set; }
 

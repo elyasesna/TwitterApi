@@ -5,7 +5,7 @@
 namespace TwitterApi.Migrations
 {
     /// <inheritdoc />
-    public partial class changedefaultlength : Migration
+    public partial class ChangeIdentityDefaultLength : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

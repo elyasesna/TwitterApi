@@ -35,6 +35,7 @@ builder.Services.AddAuthentication(cs =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<EmailOptions>(builder.Configuration);

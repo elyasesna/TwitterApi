@@ -12,8 +12,8 @@ using TwitterApi.Data;
 namespace TwitterApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240222080137_add-user-dates")]
-    partial class adduserdates
+    [Migration("20240221184127_change-default-length")]
+    partial class ChangeIdentityDefaultLength
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -189,9 +189,6 @@ namespace TwitterApi.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -218,9 +215,6 @@ namespace TwitterApi.Migrations
                     b.Property<string>("ProfileImagePath")
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
-
-                    b.Property<DateTime>("RegisteredAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
