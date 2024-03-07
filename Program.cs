@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Sieve.Models;
+using Sieve.Services;
 using System.Security.Claims;
 using TwitterApi.Contracts;
 using TwitterApi.Data;
 using TwitterApi.Data.Entities;
 using TwitterApi.Services;
+using TwitterApi.Sieve;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +39,10 @@ builder.Services.AddAuthentication(cs =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPostService, PostService>();
+
+builder.Services.Configure<SieveOptions>(builder.Configuration.GetSection("Sieve"));
+builder.Services.AddScoped<ISieveProcessor, ApplicationSieveProcessor>();
+builder.Services.AddScoped<ISieveCustomFilterMethods, SieveCustomFilterMethods>();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<EmailOptions>(builder.Configuration);

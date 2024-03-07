@@ -1,4 +1,5 @@
-﻿using TwitterApi.Data.DTOs;
+﻿using Sieve.Models;
+using TwitterApi.Data.DTOs;
 using TwitterApi.Data.Entities;
 using TwitterApi.Data.Models;
 
@@ -6,7 +7,7 @@ namespace TwitterApi.Contracts
 {
    public interface IPostService
    {
-      public Task<List<PostDTO>> GetAllAsync();
+      public Task<PagedListDTO<PostDTO>> GetAllAsync(SieveModel sieveModel);
       public Task<PostDTO> GetByIdAsync(long id);
       public Task<PostDTO> CreateAsync(PostModel post, string userId);
       public Task<PostDTO> UpdateAsync(long id, PostModel post, string userId);

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using System.Security.Claims;
 using TwitterApi.Contracts;
 using TwitterApi.Data.Models;
@@ -26,8 +27,8 @@ namespace TwitterApi.Controllers
       }
 
       [HttpGet]
-      public async Task<IActionResult> GetAll()
-         => Ok(await _postService.GetAllAsync());
+      public async Task<IActionResult> GetAll([FromQuery] SieveModel sieveModel)
+         => Ok(await _postService.GetAllAsync(sieveModel));
 
 
       [HttpGet("{id:long}")]

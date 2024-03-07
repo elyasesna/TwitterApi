@@ -10,6 +10,9 @@ namespace TwitterApi.Sieve
          mapper.Property<User>(p => p.UserName)
             .CanSort()
             .CanFilter();
+
+         mapper.Property<User>(User => User.FullName)
+            .CanFilter();
       }
    }
 }
