@@ -30,7 +30,7 @@ namespace TwitterApi.Controllers
          _env = env;
       }
 
-      //[Authorize(Roles = Roles.Admin)]
+      [Authorize(Roles = Roles.Admin)]
       [HttpGet]
       public async Task<IActionResult> GetAll()
          => Ok(await _userService.GetAllAsync());

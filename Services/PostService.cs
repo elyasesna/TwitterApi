@@ -1,23 +1,19 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
-using System.ComponentModel.Design;
 using TwitterApi.Contracts;
 using TwitterApi.Data;
 using TwitterApi.Data.DTOs;
 using TwitterApi.Data.Entities;
 using TwitterApi.Data.Models;
-using TwitterApi.Utilities;
 
 namespace TwitterApi.Services
 {
 	public class PostService : BaseService, IPostService
 	{
-		private readonly UserManager<User> _userManager;
+		//private readonly UserManager<User> _userManager;
 		private readonly ISieveProcessor _sieveProcessor;
 
 		public PostService(
@@ -67,15 +63,78 @@ namespace TwitterApi.Services
 				await _unitOfWork.InsertAsync(postEntity);
 				await _unitOfWork.CommityAsync();
 
+				postEntity.User = _unitOfWork.Get<User>().FirstOrDefault(p => p.Id == userId);
+
 				return _mapper.Map<PostDTO>(postEntity);
 			}
 
 			throw new Exception("Post content cannot be empty");
 		}
 
-		public async Task<bool> Delete(long id)
+		public async Task<PostDTO> UpdateAsync(long id, PostModel post, string userId)
 		{
-			var postEntity = await _unitOfWork.GetByIdAsync<Post>(id)
+			if (string.IsNullOrWhiteSpace(post.Content))
+				throw new Exception("Post content cannot be empty");
+
+			var postEntity = await _unitOfWork.Get<Post>()
+									.Include(p => p.User)
+									.Include(p => p.Likes)
+									.Include(p => p.Comments)
+									.Include(p => p.Visitors)
+									.Include(p => p.Hashtags)
+										.ThenInclude(p => p.Hashtag)
+									.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId)
+									?? throw new EntryPointNotFoundException();
+
+			postEntity.Content = post.Content;
+
+			foreach (var tag in post.Hashtags)
+			{
+				var hashtag = _unitOfWork.Get<Hashtag>().FirstOrDefault(p => p.Tag == tag);
+
+				if (hashtag is null ||
+					 !postEntity.Hashtags.Any(p => p.HashtagId == hashtag.Id))
+				{
+					if (hashtag is null)
+					{
+						hashtag = new Hashtag
+						{
+							Tag = tag
+						};
+						await _unitOfWork.InsertAsync(hashtag);
+					}
+					else
+					{
+						hashtag.UsedCount += 1;
+					}
+
+					var postHashtag = new PostHashtags
+					{
+						Hashtag = hashtag
+					};
+
+					postEntity.Hashtags.Add(postHashtag);
+				}
+			}
+
+			foreach (var postHashtag in postEntity.Hashtags.Where(p =>
+													!post.Hashtags.Contains(p.Hashtag.Tag)))
+			{
+				var hashtag = _unitOfWork.Get<Hashtag>().FirstOrDefault(p => p.Id == postHashtag.HashtagId);
+				hashtag.UsedCount = hashtag.UsedCount > 0 ? hashtag.UsedCount - 1 : 0;
+
+				postEntity.Hashtags.Remove(postHashtag);
+			}
+
+			await _unitOfWork.CommityAsync();
+
+			return _mapper.Map<PostDTO>(postEntity);
+		}
+
+		public async Task<bool> DeleteAsync(long id, string userId)
+		{
+			var postEntity = await _unitOfWork.Get<Post>()
+									.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId)
 									?? throw new EntryPointNotFoundException();
 			_unitOfWork.Delete(postEntity);
 			return await _unitOfWork.CommityAsync();
@@ -87,12 +146,12 @@ namespace TwitterApi.Services
 				.Get<Post>()
 				.AsNoTracking();
 
-			//اعمال فیلترینگ و مرتب سازی
+			//filtering & ordering
 			result = _sieveProcessor.Apply(sieveModel, result, applyPagination: false);
 			var count = await result.CountAsync();
 			if (count > 0)
 			{
-				//اعمال صفحه بندی
+				//pagination
 				var records = _sieveProcessor
 				  .Apply(sieveModel, result)
 				  .ProjectTo<PostDTO>(_mapper.ConfigurationProvider)
@@ -197,65 +256,13 @@ namespace TwitterApi.Services
 						?? throw new EntryPointNotFoundException();
 
 			var like = postEntity.Likes
-								.FirstOrDefault(c => c.UserId == userId)
-				?? throw new EntryPointNotFoundException();
+								.FirstOrDefault(c => c.UserId == userId);
+			//?? throw new EntryPointNotFoundException();
+
+			if (like == null) return true;
 
 			postEntity.Likes.Remove(like);
 			return await _unitOfWork.CommityAsync();
-		}
-
-		public async Task<PostDTO> UpdateAsync(long id, PostModel post, string userId)
-		{
-			if (string.IsNullOrWhiteSpace(post.Content))
-				throw new Exception("Post content cannot be empty");
-
-			var postEntity = await _unitOfWork.Get<Post>()
-									.Include(p => p.Hashtags)
-										.ThenInclude(p => p.Hashtag)
-									.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId)
-									?? throw new EntryPointNotFoundException();
-
-			postEntity.Content = post.Content;
-
-			foreach (var tag in post.Hashtags)
-			{
-				var hashtag = _unitOfWork.Get<Hashtag>().FirstOrDefault(p => p.Tag == tag);
-
-				if (hashtag is null ||
-					 !postEntity.Hashtags.Any(p => p.HashtagId == hashtag.Id))
-				{
-					if (hashtag is null)
-					{
-						hashtag = new Hashtag
-						{
-							Tag = tag
-						};
-						await _unitOfWork.InsertAsync(hashtag);
-					}
-					else
-					{
-						hashtag.UsedCount += 1;
-					}
-
-					var postHashtag = new PostHashtags
-					{
-						Hashtag = hashtag
-					};
-
-					postEntity.Hashtags.Add(postHashtag);
-				}
-			}
-
-			foreach (var postHashtag in postEntity.Hashtags.Where(p =>
-													!post.Hashtags.Contains(p.Hashtag.Tag)))
-			{
-				postEntity.Hashtags.Remove(postHashtag);
-			}
-
-			await _unitOfWork.CommityAsync();
-
-			return _mapper.Map<PostDTO>(postEntity);
-
 		}
 
 		public async Task<bool> VisitAsync(long postId, string userId)

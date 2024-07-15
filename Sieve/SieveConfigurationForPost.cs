@@ -12,6 +12,10 @@ namespace TwitterApi.Sieve
 
 			mapper.Property<Post>(p => p.User.FullName)
 				.CanFilter()
+				.HasName("FullName");
+
+			mapper.Property<Post>(p => p.User.UserName)
+				.CanFilter()
 				.HasName("UserName");
 
 			mapper.Property<Post>(p => p.CreatedAt)

@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using System.Security.Claims;
 using TwitterApi.Contracts;
+using TwitterApi.Data.Entities;
 using TwitterApi.Data.Models;
+using TwitterApi.Utilities;
 
 namespace TwitterApi.Controllers
 {
@@ -26,8 +28,9 @@ namespace TwitterApi.Controllers
          _env = env;
       }
 
+      [Authorize(Roles = Roles.Admin)]
       [HttpGet]
-      public async Task<IActionResult> GetAll([FromQuery] SieveModel sieveModel)
+		public async Task<IActionResult> GetAll([FromQuery] SieveModel sieveModel)
          => Ok(await _postService.GetAllAsync(sieveModel));
 
 
@@ -54,9 +57,12 @@ namespace TwitterApi.Controllers
       [Authorize]
       [HttpDelete("{id:long}")]
       public async Task<IActionResult> Remove(long id)
-         => Ok(await _postService.Delete(id));
+		{
+			string userId = HttpContext.User.Claims.First(p => p.Type == ClaimTypes.NameIdentifier).Value;
+			return Ok(await _postService.DeleteAsync(id, userId));
+		}
 
-      [Authorize]
+		[Authorize]
       [HttpPost("{id:long}/like")]
       public async Task<IActionResult> Like(long id)
          => Ok(await _postService.LikeAsync(id,
@@ -71,7 +77,7 @@ namespace TwitterApi.Controllers
       [Authorize]
       [HttpPost("{id:long}/unlike")]
       public async Task<IActionResult> UnLike(long id)
-         => Ok(await _postService.LikeAsync(id,
+         => Ok(await _postService.UnlikeAsync(id,
                HttpContext.User.Claims.First(p => p.Type == ClaimTypes.NameIdentifier).Value));
 
       [Authorize]

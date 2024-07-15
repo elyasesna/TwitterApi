@@ -11,7 +11,7 @@ namespace TwitterApi.Contracts
       public Task<PostDTO> GetByIdAsync(long id);
       public Task<PostDTO> CreateAsync(PostModel post, string userId);
       public Task<PostDTO> UpdateAsync(long id, PostModel post, string userId);
-      public Task<bool> Delete(long id);
+      public Task<bool> DeleteAsync(long id, string userId);
 
       public Task<bool> LikeAsync(long postId, string userId);
       public Task<bool> UnlikeAsync(long postId, string userId);
